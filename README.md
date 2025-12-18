@@ -34,3 +34,11 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Below are Windows-safe ways to generate and set BETTER_AUTH_SECRET.
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+Copy the output, then run:
+
+npx convex env set BETTER_AUTH_SECRET "PASTE_THE_VALUE_HERE"
+npx convex env set BETTER_AUTH_SECRET "bm0a0PNfgSXSrhs6/NrXmauCsZCn7aedVQEtDsD47k="
+
+pnpm dlx convex dev

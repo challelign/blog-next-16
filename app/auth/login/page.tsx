@@ -28,10 +28,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/schemas/auth";
 import { SocialAuth } from "@/components/auth/social-auth";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -41,14 +45,24 @@ const LoginPage = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      alert(JSON.stringify(values, null, 2));
-      setIsLoading(false);
-    }, 2000);
+
+    await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Logged in successfully");
+          router.push("/");
+        },
+        onError: (error) => {
+          toast.error(error?.error.message || "Failed to log in");
+        },
+      },
+    });
+    setIsLoading(false);
   }
 
   return (

@@ -26,15 +26,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authSchema } from "@/schemas/auth";
+import { signUpSchema } from "@/schemas/auth";
 import { SocialAuth } from "@/components/auth/social-auth";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignupPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof authSchema>>({
-    resolver: zodResolver(authSchema),
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -42,14 +46,24 @@ const SignupPage = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof authSchema>) {
+  async function onSubmit(values: z.infer<typeof signUpSchema>) {
     setIsLoading(true);
     // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      alert(JSON.stringify(values, null, 2));
-      setIsLoading(false);
-    }, 2000);
+    await authClient.signUp.email({
+      email: values.email,
+      password: values.password,
+      name: values.name,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Account created successfully");
+          router.push("/");
+        },
+        onError: (error) => {
+          toast.error(error?.error.message || "Failed to create account");
+        },
+      },
+    });
+    setIsLoading(false);
   }
 
   return (
