@@ -5,7 +5,8 @@ export default defineSchema({
   posts: defineTable({
     title: v.string(),
     body: v.string(),
-    authorId: v.string()
+    authorId: v.string(),
+  }).searchIndex("search_title", {
+    searchField: "title",
   }),
- 
 });

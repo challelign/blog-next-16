@@ -25,7 +25,34 @@ export const getPosts = query({
   args: {},
   handler: async (ctx) => {
     const posts = await ctx.db.query("posts").order("desc").collect();
-    return posts;
+    // Deduplicate by _id
+    const uniquePosts = Array.from(
+      new Map(posts.map((post) => [post._id, post])).values()
+    );
+    return uniquePosts;
+  },
+});
+
+// Search posts by title
+export const searchPosts = query({
+  args: { query: v.string() },
+  handler: async (ctx, args) => {
+    if (args.query === "") {
+      return await ctx.db.query("posts").order("desc").collect();
+    }
+
+    const posts = await ctx.db
+      .query("posts")
+      .withSearchIndex("search_title", (q) => q.search("title", args.query))
+      .collect();
+
+    // Deduplicate by _id to ensure unique results
+    const uniquePosts = Array.from(
+      new Map(posts.map((post) => [post._id, post])).values()
+    );
+
+    console.log("POSTS=>", uniquePosts.length);
+    return uniquePosts;
   },
 });
 

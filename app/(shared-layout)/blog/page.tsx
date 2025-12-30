@@ -1,24 +1,17 @@
-//  The Above works fine  and the down code is server code
-
-import { api } from "@/convex/_generated/api";
-
 import { BlogCard } from "@/components/web/blog-card";
-import { Input } from "@/components/ui/input";
 import { SearchIcon, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchQuery } from "convex/nextjs";
 import { Suspense } from "react";
+import { BlogSearch } from "@/components/web/blog-search";
+import { api } from "@/convex/_generated/api";
 
-const BlogPage = () => {
-  //   const [searchQuery, setSearchQuery] = useState("");
-
-  //   const filteredPosts = data?.filter((post) => {
-  //     const term = searchQuery.toLowerCase();
-  //     return (
-  //       post.title.toLowerCase().includes(term) ||
-  //       post.body.toLowerCase().includes(term)
-  //     );
-  //   });
+const BlogPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) => {
+  const { q } = await searchParams;
 
   return (
     <div className="min-h-screen bg-background pb-10">
@@ -38,19 +31,7 @@ const BlogPage = () => {
             design, and everything in between.
           </p>
 
-          {/* Search Bar */}
-          <div className="mx-auto mt-12 max-w-md">
-            <div className="relative group">
-              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-primary" />
-              <Input
-                type="text"
-                placeholder="Search articles..."
-                className="h-12 w-full rounded-full border-primary/50 bg-background/50 pl-10 backdrop-blur-xl transition-all focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
-                // value={searchQuery}
-                // onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
+          <BlogSearch />
         </div>
 
         {/* Background Decorative Elements */}
@@ -59,8 +40,8 @@ const BlogPage = () => {
 
       {/* Content Section */}
 
-      <Suspense fallback={<SkeletonList />}>
-        <LoadBlogList />
+      <Suspense key={q} fallback={<SkeletonList />}>
+        <LoadBlogList query={q} />
       </Suspense>
     </div>
   );
@@ -68,9 +49,11 @@ const BlogPage = () => {
 
 export default BlogPage;
 
-async function LoadBlogList() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const data = await fetchQuery(api.posts.getPosts);
+async function LoadBlogList({ query }: { query?: string }) {
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+  const data = query
+    ? await fetchQuery(api.posts.searchPosts, { query })
+    : await fetchQuery(api.posts.getPosts);
 
   return (
     <div className="container mx-auto px-4">
@@ -95,14 +78,14 @@ async function LoadBlogList() {
           </div>
           <h3 className="text-xl font-semibold">No articles found</h3>
           <p className="mt-2 text-muted-foreground">
-            {/* We couldn't find any articles matching "{searchQuery}". */}
+            We couldn't find any articles matching "{query}".
             <br /> Try adjusting your search terms.
           </p>
         </div>
       ) : (
         // Post Grid
         <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-          {data?.map((post) => (
+          {data?.map((post: any) => (
             <div key={post._id} className="h-full">
               <BlogCard post={post} />
             </div>
