@@ -5,7 +5,7 @@ import { Button, buttonVariants } from "../ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -44,6 +44,9 @@ export const Navbar = () => {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const [isMounted, setIsMounted] = React.useState(false);
+  const pathname = usePathname();
+
+  console.log(pathname);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -92,7 +95,13 @@ export const Navbar = () => {
                   <NavigationMenuLink asChild>
                     <Link
                       href={link.href}
-                      className={navigationMenuTriggerStyle()}
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        (link.href === "/"
+                          ? pathname === "/"
+                          : pathname?.startsWith(link.href)) &&
+                          "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground border-b-2 border-b-red-300"
+                      )}
                     >
                       {link.name}
                     </Link>
@@ -209,7 +218,13 @@ export const Navbar = () => {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="block px-2 py-1 text-lg font-medium hover:text-primary transition-colors"
+                      className={cn(
+                        "block px-2 py-1 text-lg font-medium hover:text-primary transition-colors",
+                        (link.href === "/"
+                          ? pathname === "/"
+                          : pathname?.startsWith(link.href)) &&
+                          "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground border-b-2 border-b-red-300"
+                      )}
                     >
                       {link.name}
                     </Link>
