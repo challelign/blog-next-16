@@ -4,7 +4,11 @@ import { authComponent } from "./auth";
 
 // Create a new task with the given text
 export const createPost = mutation({
-  args: { title: v.string(), body: v.string() },
+  args: {
+    title: v.string(),
+    body: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
+  },
   handler: async (ctx, args) => {
     const user = await authComponent.safeGetAuthUser(ctx);
     console.log("USER=>", user);
@@ -15,6 +19,7 @@ export const createPost = mutation({
       title: args.title,
       body: args.body,
       authorId: user._id,
+      imageStorageId: args.imageStorageId,
     });
     return blogArticle;
   },
@@ -29,7 +34,15 @@ export const getPosts = query({
     const uniquePosts = Array.from(
       new Map(posts.map((post) => [post._id, post])).values()
     );
-    return uniquePosts;
+
+    return await Promise.all(
+      uniquePosts.map(async (post) => ({
+        ...post,
+        imageUrl: post.imageStorageId
+          ? await ctx.storage.getUrl(post.imageStorageId)
+          : null,
+      }))
+    );
   },
 });
 
@@ -52,7 +65,14 @@ export const searchPosts = query({
     );
 
     console.log("POSTS=>", uniquePosts.length);
-    return uniquePosts;
+    return await Promise.all(
+      uniquePosts.map(async (post) => ({
+        ...post,
+        imageUrl: post.imageStorageId
+          ? await ctx.storage.getUrl(post.imageStorageId)
+          : null,
+      }))
+    );
   },
 });
 
@@ -65,6 +85,27 @@ export const getPostsByAuthorId = query({
       .filter((q) => q.eq(q.field("authorId"), args.authorId))
       .order("desc")
       .take(100);
-    return posts;
+
+    return await Promise.all(
+      posts.map(async (post) => ({
+        ...post,
+        imageUrl: post.imageStorageId
+          ? await ctx.storage.getUrl(post.imageStorageId)
+          : null,
+      }))
+    );
+  },
+});
+
+export const generateImageUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await authComponent.safeGetAuthUser(ctx);
+    console.log("USER=>", user);
+    if (!user) {
+      throw new ConvexError("User not authenticated");
+    }
+    const url = await ctx.storage.generateUploadUrl();
+    return url;
   },
 });

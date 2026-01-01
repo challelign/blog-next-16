@@ -1,10 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 
 import {
   Card,
@@ -35,14 +35,34 @@ export default function CreateRoute() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const mutation = useMutation(api.posts.createPost);
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       title: "",
       content: "",
+      image: undefined,
     },
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      form.setValue("image", file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    form.setValue("image", undefined);
+    setImagePreview(null);
+  };
 
   async function onSubmit(values: z.infer<typeof postSchema>) {
     // ## Option 1 convex
@@ -138,6 +158,68 @@ export default function CreateRoute() {
                             {...field}
                             className="bg-background/50 pr-10"
                           />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <FormItem>
+                      <FormLabel>Featured Image</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {imagePreview ? (
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group border border-border/50">
+                              <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="object-cover w-full h-full"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                onClick={removeImage}
+                              >
+                                <X className="size-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-12 text-center hover:bg-muted/50 hover:border-muted-foreground/30 transition-all cursor-pointer group"
+                              onClick={() =>
+                                document.getElementById("image-upload")?.click()
+                              }
+                            >
+                              <Input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
+                                disabled={isPending}
+                              />
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="p-4 rounded-full bg-primary/5 text-primary group-hover:bg-primary/10 transition-colors">
+                                  <ImagePlus className="size-8" />
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium">
+                                    Upload featured image
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Drag and drop or click to select
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </FormControl>
                       <FormMessage />

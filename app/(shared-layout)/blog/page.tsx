@@ -5,6 +5,11 @@ import { fetchQuery } from "convex/nextjs";
 import { Suspense } from "react";
 import { BlogSearch } from "@/components/web/blog-search";
 import { api } from "@/convex/_generated/api";
+// export const dynamic = "force-dynamic";
+// 'auto' is the default value
+// 'force-dynamic' is the same as 'auto'
+// 'error' is the same as 'auto'
+// 'force-static' is the same as 'auto'
 
 const BlogPage = async ({
   searchParams,

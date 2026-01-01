@@ -15,7 +15,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 interface BlogCardProps {
-  post: Doc<"posts">;
+  post: Doc<"posts"> & { imageUrl?: string | null };
 }
 
 export function BlogCard({ post }: BlogCardProps) {
@@ -26,13 +26,17 @@ export function BlogCard({ post }: BlogCardProps) {
     year: "numeric",
   });
 
+  const placeholderImage =
+    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop";
+
   return (
     <Card className="group h-full flex flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1">
       <div className="relative h-48 w-full overflow-hidden">
         <Image
-          src={`https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`}
+          src={post.imageUrl ?? placeholderImage}
           alt={post.title}
           fill
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105 rounded-t-lg"
         />
         <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
