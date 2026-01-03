@@ -1,8 +1,8 @@
 import { ArrowLeft, Calendar, User, Clock, Bookmark } from "lucide-react";
 import { calculateReadingTime } from "@/lib/utils";
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import { fetchQuery } from "convex/nextjs";
+import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { notFound } from "next/navigation";
@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import ShareButton from "./_components/ShareButton";
+import CommentSection from "@/components/web/comment-section";
 
 interface BlogProps {
   params: Promise<{ blogId: Id<"posts"> }>;
@@ -18,6 +19,10 @@ interface BlogProps {
 const Blog = async ({ params }: BlogProps) => {
   const { blogId } = await params;
   const post = await fetchQuery(api.posts.getPostById, { id: blogId });
+  const preloadedComments = await preloadQuery(
+    api.comments.getCommentsByPostId,
+    { postId: blogId }
+  );
 
   if (!post) {
     notFound();
@@ -41,7 +46,13 @@ const Blog = async ({ params }: BlogProps) => {
           </Link>
 
           <div className="flex items-center gap-2">
-            <ShareButton />
+            <Suspense
+              fallback={
+                <div className="h-9 w-9 bg-muted animate-pulse rounded-md" />
+              }
+            >
+              <ShareButton />
+            </Suspense>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Bookmark className="size-4" />
             </Button>
@@ -128,6 +139,16 @@ const Blog = async ({ params }: BlogProps) => {
               </Button>
             </div>
           </footer>
+
+          <Separator className="my-12" />
+          <Suspense
+            fallback={
+              <div className="h-40 bg-muted/20 animate-pulse rounded-xl" />
+            }
+          >
+            {/* <CommentSection postId={blogId} /> */}
+            <CommentSection preloadedComments={preloadedComments} />
+          </Suspense>
         </article>
       </main>
     </div>

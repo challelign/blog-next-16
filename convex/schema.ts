@@ -10,4 +10,10 @@ export default defineSchema({
   }).searchIndex("search_title", {
     searchField: "title",
   }),
+  comments: defineTable({
+    postId: v.id("posts"),
+    authorId: v.string(),
+    authorName: v.string(),
+    body: v.string(),
+  }),
 });
