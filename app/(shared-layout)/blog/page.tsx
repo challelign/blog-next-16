@@ -1,15 +1,100 @@
 import { BlogCard } from "@/components/web/blog-card";
+import { absoluteUrl } from "@/lib/utils";
 import { SearchIcon, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchQuery } from "convex/nextjs";
 import { Suspense } from "react";
 import { BlogSearch } from "@/components/web/blog-search";
 import { api } from "@/convex/_generated/api";
+import { Metadata } from "next";
+import Script from "next/script";
+
 // export const dynamic = "force-dynamic";
 // 'auto' is the default value
 // 'force-dynamic' is the same as 'auto'
 // 'error' is the same as 'auto'
 // 'force-static' is the same as 'auto'
+
+// For Static Site Generation
+<Script
+  id="blog-schema"
+  type="application/ld+json"
+  strategy="afterInteractive"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      name: "Blog | Next.js 16 Convex",
+      description:
+        "Read all our blog articles on development, design, and everything in between.",
+      url: absoluteUrl("/blog"),
+      author: {
+        "@type": "Person",
+        name: "Challelign T.",
+      },
+    }),
+  }}
+/>;
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
+  title: {
+    default: "Blog | Next.js 16 Convex",
+    template: "%s | Next.js 16 Convex",
+  },
+  description:
+    "Read all our blog articles on development, design, and everything in between.",
+  authors: [{ name: "Challelign T." }],
+  keywords: [
+    "Next.js",
+    "Convex",
+    "Blog",
+    "Development",
+    "Design",
+    "Everything",
+  ],
+  creator: "Challelign T.",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/blog",
+    title: "Blog | Next.js 16 Convex",
+    description:
+      "Read all our blog articles on development, design, and everything in between.",
+    siteName: "Next.js 16 Convex Blog",
+    images: [
+      {
+        url: absoluteUrl("/og-image.png"), // Assuming you have one, or fallback
+        width: 1200,
+        height: 630,
+        alt: "Blog | Next.js 16 Convex",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog | Next.js 16 Convex",
+    description:
+      "Read all our blog articles on development, design, and everything in between.",
+    images: [absoluteUrl("/og-image.png")],
+    creator: "@challelign",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "/blog",
+  },
+};
 
 const BlogPage = async ({
   searchParams,

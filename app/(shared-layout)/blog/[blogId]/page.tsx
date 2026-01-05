@@ -1,5 +1,5 @@
 import { ArrowLeft, Calendar, User, Clock, Bookmark } from "lucide-react";
-import { calculateReadingTime } from "@/lib/utils";
+import { calculateReadingTime, absoluteUrl } from "@/lib/utils";
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
@@ -13,9 +13,59 @@ import { Separator } from "@/components/ui/separator";
 import ShareButton from "./_components/ShareButton";
 import CommentSection from "@/components/web/comment-section";
 import { promise } from "zod";
+import { Metadata } from "next";
 
 interface BlogProps {
   params: Promise<{ blogId: Id<"posts"> }>;
+}
+
+// For Daynamci site generation
+export async function generateMetadata({
+  params,
+}: BlogProps): Promise<Metadata> {
+  const { blogId } = await params;
+  const post = await fetchQuery(api.posts.getPostById, { id: blogId });
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      description: "The post you are looking for does not exist.",
+    };
+  }
+  const ogUrl = absoluteUrl(`/blog/${blogId}`);
+  const description =
+    post.body.slice(0, 160).replace(/\n/g, " ").trim() + "...";
+  const ogImage = post.imageUrl || absoluteUrl("/og-image.png");
+
+  return {
+    title: post.title,
+    description: description,
+    openGraph: {
+      title: post.title,
+      description: description,
+      type: "article",
+      url: ogUrl,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      publishedTime: new Date(post._creationTime).toISOString(),
+      authors: ["Challelign T."],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: ogUrl,
+    },
+  };
 }
 const Blog = async ({ params }: BlogProps) => {
   const { blogId } = await params;
@@ -30,6 +80,28 @@ const Blog = async ({ params }: BlogProps) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.title,
+            image: post.imageUrl
+              ? [post.imageUrl]
+              : [absoluteUrl("/og-image.png")],
+            datePublished: new Date(post._creationTime).toISOString(),
+            dateModified: new Date(post._creationTime).toISOString(),
+            author: [
+              {
+                "@type": "Person",
+                name: "Challelign T.", // Should be dynamic if author data available
+              },
+            ],
+            description: post.body.slice(0, 160).replace(/\n/g, " ").trim(),
+          }),
+        }}
+      />
       {/* Navigation */}
       <div className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
