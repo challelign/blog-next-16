@@ -12,17 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import ShareButton from "./_components/ShareButton";
 import CommentSection from "@/components/web/comment-section";
+import { promise } from "zod";
 
 interface BlogProps {
   params: Promise<{ blogId: Id<"posts"> }>;
 }
 const Blog = async ({ params }: BlogProps) => {
   const { blogId } = await params;
-  const post = await fetchQuery(api.posts.getPostById, { id: blogId });
-  const preloadedComments = await preloadQuery(
-    api.comments.getCommentsByPostId,
-    { postId: blogId }
-  );
+  const [post, preloadedComments] = await Promise.all([
+    await fetchQuery(api.posts.getPostById, { id: blogId }),
+    await preloadQuery(api.comments.getCommentsByPostId, { postId: blogId }),
+  ]);
 
   if (!post) {
     notFound();

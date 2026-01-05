@@ -31,15 +31,18 @@ import {
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
-interface CommentSectionProps {
-  postId: Id<"posts">;
-}
+import { useParams } from "next/navigation";
+// interface CommentSectionProps {
+//   postId: Id<"posts">;
+// }
 
 // const CommentSection = ({ postId }: CommentSectionProps) => {
 const CommentSection = (props: {
   preloadedComments: Preloaded<typeof api.comments.getCommentsByPostId>;
 }) => {
   const comments = usePreloadedQuery(props.preloadedComments);
+
+  const params = useParams<{ blogId: Id<"posts"> }>(); //blogId this id refers the path blog/[blogId]
 
   const { data: session } = authClient.useSession();
   // const comments = useQuery(api.comments.getCommentsByPostId, { postId });
@@ -50,7 +53,7 @@ const CommentSection = (props: {
     resolver: zodResolver(commentSchema),
     defaultValues: {
       body: "",
-      postId: comments[0].postId,
+      postId: params.blogId,
     },
   });
 
@@ -63,6 +66,7 @@ const CommentSection = (props: {
     startTransition(async () => {
       try {
         // await createComment(form.getValues());
+
         await createComment(values);
 
         form.reset();
