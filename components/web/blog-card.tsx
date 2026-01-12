@@ -9,10 +9,12 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, UserIcon, ArrowRightIcon } from "lucide-react";
+import { CalendarIcon, ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface BlogCardProps {
   post: Doc<"posts"> & { imageUrl?: string | null };
@@ -30,19 +32,21 @@ export function BlogCard({ post }: BlogCardProps) {
     "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop";
 
   return (
-    <Card className="group h-full flex flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1">
-      <div className="relative h-48 w-full overflow-hidden">
-        <Image
-          src={post.imageUrl ?? placeholderImage}
-          alt={post.title}
-          fill
-          unoptimized
-          className="object-cover transition-transform duration-500 group-hover:scale-105 rounded-t-lg"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      </div>
+    <motion.div whileHover={{ scale: 1.05 }} className="h-full">
+      <Card className="group h-full flex flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:border-primary/50">
+        <div className="w-full overflow-hidden rounded-t-lg">
+          <AspectRatio ratio={16 / 9}>
+            <Image
+              src={post.imageUrl ?? placeholderImage}
+              alt={post.title}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          </AspectRatio>
+        </div>
 
-      <CardHeader className="space-y-2 p-6">
+        <CardHeader className="space-y-2 p-6">
         <div className="flex items-center justify-between">
           <Badge
             variant="secondary"
@@ -81,5 +85,6 @@ export function BlogCard({ post }: BlogCardProps) {
         </Button>
       </CardFooter>
     </Card>
+  </motion.div>
   );
 }
