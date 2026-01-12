@@ -168,14 +168,14 @@ async function LoadBlogList({ query }: { query?: string }) {
           </div>
           <h3 className="text-xl font-semibold">No articles found</h3>
           <p className="mt-2 text-muted-foreground">
-            We couldn't find any articles matching "{query}".
+            We couldn&apos;t find any articles matching &quot;{query}&quot;.
             <br /> Try adjusting your search terms.
           </p>
         </div>
       ) : (
         // Post Grid
         <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-          {data?.map((post: any) => (
+          {data?.map((post) => (
             <div key={post._id} className="h-full">
               <BlogCard post={post} />
             </div>

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { absoluteUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -144,7 +143,7 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {latestPosts.map((post: any) => (
+            {latestPosts.map((post) => (
               <BlogCard key={post._id} post={post} />
             ))}
           </div>

@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import ShareButton from "./_components/ShareButton";
 import CommentSection from "@/components/web/comment-section";
-import { promise } from "zod";
 import { Metadata } from "next";
 
 interface BlogProps {
@@ -180,7 +179,7 @@ const Blog = async ({ params }: BlogProps) => {
           <Separator className="mb-12" />
 
           {/* Content */}
-          <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-p:text-muted-foreground/90 prose-p:leading-relaxed selection:bg-primary/20">
+          <div className="prose prose-lg dark:prose-invert max-w-prose mx-auto prose-headings:font-bold prose-p:text-muted-foreground/90 prose-p:leading-relaxed selection:bg-primary/20">
             {post.body.split("\n").map(
               (paragraph, index) =>
                 paragraph.trim() && (
